@@ -2,6 +2,7 @@ import machine
 import dht
 import time
 
+print("Teste")
 
 ## Configuração das Portas
 PIN_DHT      = 15
@@ -17,8 +18,6 @@ PIN_SDA      = 21
 TEMP_MAX     = 45.0
 UMID_MIN     = 60.0
 INTERVALO    = 2000 
-
-print("Teste")
 
 class MiniLCD:
     def __init__(self, scl_pin, sda_pin, addr=0x27):
