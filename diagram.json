@@ -80,7 +80,9 @@
     [ "esp32:GND.2", "lcd1:GND", "black", [ "h-38.4", "v124.7" ] ],
     [ "esp32:VIN", "lcd1:VCC", "red", [ "h-48", "v124.7" ] ],
     [ "lcd1:SDA", "esp32:D21", "gray", [ "h-9.6", "v-229.8" ] ],
-    [ "lcd1:SCL", "esp32:D22", "cyan", [ "h-28.8", "v-268.2" ] ]
+    [ "lcd1:SCL", "esp32:D22", "cyan", [ "h-28.8", "v-268.2" ] ],
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ]
   ],
   "dependencies": {}
 }
