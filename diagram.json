@@ -1,7 +1,86 @@
 {
   "version": 1,
-  "author": "Uri Shaked",
+  "author": "Candidato Intensivo Maker",
   "editor": "wokwi",
-  "parts": [ { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} } ],
-  "connections": [ [ "esp:TX", "$serialMonitor:RX", "", [] ], [ "esp:RX", "$serialMonitor:TX", "", [] ] ]
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp32", "top": -33.7, "left": -101, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -143.7,
+      "left": 225,
+      "attrs": { "temperature": "50.1", "humidity": "80.5" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_green",
+      "top": -51.6,
+      "left": -245.8,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_red",
+      "top": -51.6,
+      "left": -313,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "res1",
+      "top": 43.2,
+      "left": -259.75,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "res3",
+      "top": 43.2,
+      "left": -326.95,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": -55.2,
+      "left": -420.6,
+      "attrs": { "volume": "0.1" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": -157,
+      "left": -67.2,
+      "attrs": { "color": "black", "xray": "1" }
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": 208,
+      "left": 63.2,
+      "attrs": { "pins": "i2c" }
+    }
+  ],
+  "connections": [
+    [ "esp32:GND.1", "dht1:GND", "black", [ "v-0.1", "h193.5" ] ],
+    [ "esp32:3V3", "dht1:VCC", "red", [ "h38.1", "h126.6" ] ],
+    [ "esp32:D15", "dht1:SDA", "blue", [ "h249.3", "v-134.6" ] ],
+    [ "esp32:D27", "led_green:A", "green", [ "v-0.3", "h-124.8" ] ],
+    [ "esp32:D12", "led_red:A", "#8f4814", [ "h-192", "v-106.3" ] ],
+    [ "led_green:C", "res1:1", "black", [ "v0" ] ],
+    [ "led_red:C", "res3:1", "black", [ "v0" ] ],
+    [ "res1:2", "esp32:GND.2", "black", [ "v0" ] ],
+    [ "res3:2", "esp32:GND.2", "black", [ "v0" ] ],
+    [ "bz1:1", "esp32:GND.2", "black", [ "v0" ] ],
+    [ "bz1:2", "esp32:D13", "magenta", [ "v0" ] ],
+    [ "esp32:D18", "btn1:2.r", "yellow", [ "h18.9", "v-173" ] ],
+    [ "esp32:GND.1", "btn1:1.r", "black", [ "h38.1", "v-259.3" ] ],
+    [ "esp32:GND.2", "lcd1:GND", "black", [ "h-38.4", "v124.7" ] ],
+    [ "esp32:VIN", "lcd1:VCC", "red", [ "h-48", "v124.7" ] ],
+    [ "lcd1:SDA", "esp32:D21", "gray", [ "h-9.6", "v-229.8" ] ],
+    [ "lcd1:SCL", "esp32:D22", "cyan", [ "h-28.8", "v-268.2" ] ]
+  ],
+  "dependencies": {}
 }
