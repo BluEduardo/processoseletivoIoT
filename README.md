@@ -1,62 +1,74 @@
-<<<<<<< HEAD
-=======
 # 🚀 SmartCure IoT - Monitoramento de Cura de Concreto
 
->>>>>>> 22a654921d1ee26cc1eecf02b56c74c3d353bc3b
 ### 👤 Identificação do Candidato
 * **Nome completo:** Eduardo Roberto Pereira
+* **Perfil:** Estudante de Engenharia Civil (UFCA) e Desenvolvedor Full-Stack
+* **Objetivo:** Integração de Scientific Computing e IoT na Indústria da Construção Civil
+
 ---
 
 ### 1️⃣ Visão Geral da Solução
-O **SmartCure IoT** é um sistema de monitoramento de baixo custo projetado para garantir a qualidade do concreto durante o estágio de cura. O objetivo é evitar manifestações patológicas, como fissuras por retração plástica ou térmica, através da vigilância contínua da temperatura e umidade superficial.
+O **SmartCure IoT** nasce da intersecção entre a Engenharia Civil e a Tecnologia da Informação. A construção civil é uma indústria bilionária mundialmente, mas que ainda carece de digitalização no canteiro de obras. Falhas no processo de cura do concreto são responsáveis por patologias estruturais graves e acidentes que custam milhões em reparos e vidas humanas.
+
+Este projeto aplica conceitos de **Internet das Coisas (IoT)** para garantir que o concreto atinja sua resistência de projeto, monitorando variáveis críticas que evitam a retração plástica e fissuras por dessecação.
 
 O sistema atua de forma autônoma:
-* **Monitoramento:** Captura dados ambientais em tempo real.
-* **Decisão:** Compara os dados com limiares normativos técnicos.
-* **Interface:** Informa o operador via LCD 16x2 e alertas visuais/sonoros.
+* **Monitoramento:** Captura temperatura e umidade superficial em tempo real.
+* **Prevenção:** Identifica condições climáticas adversas que comprometem a hidratação do cimento.
+* **Interface:** Alerta o operador via LCD 16x2 e sinais visuais/sonoros para intervenção imediata (molhagem ou cobertura).
 
 ---
 
 ### 2️⃣ Arquitetura do Sistema Embarcado
-A arquitetura lógica foi desenhada para priorizar a estabilidade e a facilidade de leitura no canteiro de obras:
+A arquitetura prioriza a **confiabilidade industrial**:
 
-* **Fluxo Principal (main.py):** O programa opera em um loop infinito com temporização não-bloqueante (`time.ticks_ms()`), garantindo que o sensor DHT22 seja consultado a cada 2 segundos sem travar a resposta do botão de mute.
-* **Máquina de Estados:** O sistema alterna entre os estados **NORMAL** (Verde) e **CRÍTICO** (Vermelho), onde qualquer desvio de umidade ou temperatura aciona o protocolo de segurança.
-* **Comunicação I2C:** Utiliza o protocolo `SoftI2C` para gerenciar o display LCD 20x4, garantindo resiliência na transmissão de dados no ambiente de simulação.
+* **Fluxo Principal (main.py):** Desenvolvido com lógica não-bloqueante (`time.ticks_ms()`), permitindo que o sistema processe leituras de sensores e entradas de usuário (botão de silenciamento) simultaneamente, sem atrasos (*lags*).
+* **Máquina de Estados Binária:** O sistema opera em dois estados claros: **ESTÁVEL** (Verde) e **CRÍTICO** (Vermelho). Essa decisão de design visa a usabilidade em campo, onde a tomada de decisão precisa ser rápida e sem ambiguidades.
+* **Comunicação I2C:** Implementada via `SoftI2C` para garantir a integridade dos dados exibidos no LCD sob condições de oscilação de sinal.
 
 ---
 
 ### 3️⃣ Componentes Utilizados na Simulação
-Conforme definido no `diagram.json`, os componentes principais são:
-
 | Componente | Função Técnica | Pino (GPIO) |
 | :--- | :--- | :--- |
-| **ESP32** | Microcontrolador central da solução  | - |
-| **DHT22** | Medição de Temperatura e Umidade da face do Concreto | 15 |
-| **LCD 16x2 (I2C)** | Interface detalhada para o operador  | 21, 22 |
-| **Buzzer PWM** | Alerta sonoro para chamar atenção do responsável pela obra  | 13 |
-| **LEDs R/G** | Sinalização visual binária de status | 12, 27 |
-| **Pushbutton** | Função de Acknowledge (Silenciar Alarme) | 18 |
+| **ESP32** | Microcontrolador central com baixo consumo de energia | - |
+| **DHT22** | Monitoramento de alta precisão de Temperatura e Umidade | 15 |
+| **LCD 16x2 (I2C)** | Exibição em tempo real dos dados climáticos da face | 21, 22 |
+| **Buzzer PWM** | Alerta sonoro de frequência constante (1000Hz) | 13 |
+| **LEDs R/G** | Sinalização visual de status de conformidade térmica | 12, 27 |
+| **Pushbutton** | Função de Acknowledge (Silenciamento do alarme sonoro) | 18 |
+
+<img width="706" height="475" alt="image" src="https://github.com/user-attachments/assets/a4d4afff-5d50-4b6e-b3d6-7c91e499bdfa" />
+
+Imagem do projeto SmartCure IoT
 
 ---
 
 ### 4️⃣ Decisões Técnicas Relevantes
-* **Driver MiniLCD Personalizado:** Implementado para gerenciar a escrita de nibbles de forma atômica, evitando caracteres corrompidos durante flutuações na simulação.
-* **Interface Binária:** Optou-se por remover o LED amarelo e utilizar apenas **Verde/Vermelho**. Esta decisão justifica-se pela necessidade de clareza absoluta em ambientes industriais: se está vermelho, o operador precisa intervir.
-* **Silenciamento (Mute):** O botão de mute desativa apenas o som, mantendo o LED vermelho aceso. Isso garante que o alarme sonoro não cause poluição auditiva desnecessária após o problema ser identificado, mas mantém o alerta visual até a normalização.
-* **Uso de Constantes:** Todos os limiares (`TEMP_MAX`, `UMID_MIN`) estão centralizados no topo do código para facilitar a manutenção técnica.
+* **Geração de Imagem Binária (LittleFS):** Para viabilizar a execução automatizada na esteira de CI/CD (GitHub Actions), foi necessário adicionar um processo de *build* que gera um sistema de arquivos binário utilizando a biblioteca `littlefs`. Isso permitiu empacotar o `main.py` e montá-lo diretamente na memória flash do ESP32 virtual, garantindo que o Wokwi CLI iniciasse o firmware corretamente durante os testes.
+* **Eliminação do LED Amarelo:** Em um canteiro de obras, estados intermediários podem gerar dúvida. A interface foi simplificada para Vermelho (Intervenção Necessária) ou Verde (Cura Adequada).
+* **Gestão de Alarme (Mute):** O botão silencia o buzzer para reduzir a poluição sonora, mas o LED vermelho permanece aceso até que as condições de umidade/temperatura voltem aos níveis seguros, garantindo que o alerta visual nunca seja ignorado.
+* **Driver de Display Otimizado:** Criado para enviar comandos em *nibbles* de 4 bits, o que reduz erros de comunicação e caracteres fantasmas no LCD.
 
 ---
 
-### 5️⃣ Resultados Obtidos
-O sistema demonstrou total funcionalidade no ambiente Wokwi:
-* **Estabilidade:** A pipeline de CI/CD foi validada com sucesso através de commits semânticos e uso de Secrets para chaves de API.
-* **Conformidade:** O sistema identifica corretamente quando a umidade cai abaixo de 60% ou a temperatura sobe acima de 45°C, emitindo alertas imediatos.
-* **Interface:** O LCD 16x2 exibe constantemente os valores de umidade e temperatura da face do concreto, promovendo melhor acompanhamento pelo responsável técnico da obra.
+### 5️⃣ Resultados Obtidos e Limitações
+**Resultados:**
+* **Automação de CI/CD:** Pipeline validada com sucesso. O uso do binário LittleFS garantiu a estabilidade dos testes automatizados no Wokwi sempre que um novo commit é enviado.
+* **Monitoramento Constante:** O sistema mantém um log de leitura estável, identificando riscos de dessecação (Umidade < 60%) e calor excessivo (Temp > 45°C).
+
+**Limitações Atuais:**
+* **Ponto Único de Leitura:** O protótipo utiliza apenas um sensor de face, não capturando variações em grandes áreas de concretagem.
+* **Dependência de Energia:** O sistema ainda não possui modo de baixo consumo (*Deep Sleep*) para operação prolongada em locais sem rede elétrica estável.
 
 ---
 
-### 6️⃣ Comentários Adicionais
-* **Aprendizados:** O projeto reforçou a importância do versionamento semântico e da proteção de chaves sensíveis em ambientes de nuvem.
-* **Dificuldades:** A calibração da comunicação I2C no simulador exigiu a implementação de um driver robusto baseado em temporização manual de pulsos.
-* **Melhorias:** Em uma versão futura, seria ideal implementar o envio de dados via protocolo MQTT para monitoramento remoto via dashboard em nuvem.
+### 6️⃣ Dificuldades e Melhorias Futuras
+**Dificuldades Encontradas:**
+O maior desafio técnico foi adequar o ambiente de simulação local para a esteira de integração contínua (CI). O Wokwi CLI exigia a pré-montagem do sistema de arquivos do ESP32 para executar o MicroPython no GitHub Actions, o que me obrigou a estudar e implementar o empacotamento do firmware via `littlefs`. Além disso, a calibração do barramento I2C no simulador exigiu o desenvolvimento de uma classe personalizada (`MiniLCD`) para controlar manualmente o tempo de pulso do sinal de *Enable*.
+
+**Melhorias Planejadas (V2):**
+* **Gradiente Térmico:** Reintegração do potenciômetro para simular sensores de núcleo, permitindo comparar a temperatura interna vs. externa (essencial para concreto de massa).
+* **Expansão de Interface:** Upgrade para LCD 20x4 para exibição simultânea de mais métricas de engenharia.
+* **Integração Mobile:** Envio de alertas via MQTT/Telegram para dispositivos móveis, permitindo que o engenheiro responsável monitore a cura à distância.
+* **Análise de Maturação:** Implementação de algoritmos para cálculo da curva de maturidade do concreto diretamente no ESP32.
