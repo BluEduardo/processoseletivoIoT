@@ -1,21 +1,21 @@
 # 🚀 SmartCure IoT - Monitoramento de Cura de Concreto
 
 ### 👤 Identificação do Candidato
-* **Nome completo:** Eduardo Roberto Pereira
-* **Perfil:** Estudante de Engenharia Civil (UFCA) e Desenvolvedor Full-Stack
-* **Objetivo:** Integração de Scientific Computing e IoT na Indústria da Construção Civil
+* **Nome Completo:** Eduardo Roberto Pereira
+* **Perfil:** Estudante de Engenharia Civil e Desenvolvedor Full-Stack
+* **Objetivo:** Integração de Sistemas Embarcados e IoT na Indústria da Construção Civil
 
 ---
 
 ### 1️⃣ Visão Geral da Solução
-O **SmartCure IoT** nasce da intersecção entre a Engenharia Civil e a Tecnologia da Informação. A construção civil é uma indústria bilionária mundialmente, mas que ainda carece de digitalização no canteiro de obras. Falhas no processo de cura do concreto são responsáveis por patologias estruturais graves e acidentes que custam milhões em reparos e vidas humanas.
+O **SmartCure IoT** é um sistema embarcado voltado para a digitalização do canteiro de obras, que nasce da intersecção entre a Engenharia Civil e a Tecnologia da Informação. A construção civil é uma indústria bilionária mundialmente, mas que ainda carece de digitalização na sua rotina. Falhas no processo de cura do concreto são responsáveis por patologias estruturais graves e acidentes que custam milhões em reparos e vidas humanas.
 
 Este projeto aplica conceitos de **Internet das Coisas (IoT)** para garantir que o concreto atinja sua resistência de projeto, monitorando variáveis críticas que evitam a retração plástica e fissuras por dessecação.
 
-O sistema atua de forma autônoma:
-* **Monitoramento:** Captura temperatura e umidade superficial em tempo real.
-* **Prevenção:** Identifica condições climáticas adversas que comprometem a hidratação do cimento.
-* **Interface:** Alerta o operador via LCD 16x2 e sinais visuais/sonoros para intervenção imediata (molhagem ou cobertura).
+O sistema atua em três níveis:
+* **Monitoramento:** Captura contínua de temperatura e umidade via sensor DHT22.
+* **Análise de Risco:** Processamento local de limiares técnicos de engenharia.
+* **Interface de Ação:** Alertas visuais (Semáforo LED), sonoros (Buzzer) e textuais (LCD) com instruções de intervenção (molhagem e/ou cobertura).
 
 ---
 
@@ -23,7 +23,7 @@ O sistema atua de forma autônoma:
 A arquitetura prioriza a **confiabilidade industrial**:
 
 * **Fluxo Principal (main.py):** Desenvolvido com lógica não-bloqueante (`time.ticks_ms()`), permitindo que o sistema processe leituras de sensores e entradas de usuário (botão de silenciamento) simultaneamente, sem atrasos (*lags*).
-* **Máquina de Estados Binária:** O sistema opera em dois estados claros: **ESTÁVEL** (Verde) e **CRÍTICO** (Vermelho). Essa decisão de design visa a usabilidade em campo, onde a tomada de decisão precisa ser rápida e sem ambiguidades.
+* **Hierarquia de Alertas:** O sistema categoriza o ambiente em três zonas (Ideal, Atenção e Crítica), garantindo que o operador saiba a urgência da ação necessária.
 * **Comunicação I2C:** Implementada via `SoftI2C` para garantir a integridade dos dados exibidos no LCD sob condições de oscilação de sinal.
 
 ---
@@ -33,29 +33,47 @@ A arquitetura prioriza a **confiabilidade industrial**:
 | :--- | :--- | :--- |
 | **ESP32** | Microcontrolador central com baixo consumo de energia | - |
 | **DHT22** | Monitoramento de alta precisão de Temperatura e Umidade | 15 |
-| **LCD 16x2 (I2C)** | Exibição em tempo real dos dados climáticos da face | 21, 22 |
-| **Buzzer PWM** | Alerta sonoro de frequência constante (1000Hz) | 13 |
-| **LEDs R/G** | Sinalização visual de status de conformidade térmica | 12, 27 |
-| **Pushbutton** | Função de Acknowledge (Silenciamento do alarme sonoro) | 18 |
-
-<img width="706" height="475" alt="image" src="https://github.com/user-attachments/assets/a4d4afff-5d50-4b6e-b3d6-7c91e499bdfa" />
-
-Imagem do projeto SmartCure IoT
+| **LCD 16x2 (I2C)** | Interface textual para dados e instruções de engenharia | 21, 22 |
+| **Buzzer PWM** | Alerta sonoro para estados críticos de emergência | 13 |
+| **LEDs (R/Y/G)** | Semáforo de status (Crítico, Atenção, Ideal) | 12, 14, 27 |
+| **Pushbutton** | Silenciamento (Mute) do alarme sonoro | 18 |
 
 ---
 
 ### 4️⃣ Decisões Técnicas Relevantes
 * **Geração de Imagem Binária (LittleFS):** Para viabilizar a execução automatizada na esteira de CI/CD (GitHub Actions), foi necessário adicionar um processo de *build* que gera um sistema de arquivos binário utilizando a biblioteca `littlefs`. Isso permitiu empacotar o `main.py` e montá-lo diretamente na memória flash do ESP32 virtual, garantindo que o Wokwi CLI iniciasse o firmware corretamente durante os testes.
-* **Eliminação do LED Amarelo:** Em um canteiro de obras, estados intermediários podem gerar dúvida. A interface foi simplificada para Vermelho (Intervenção Necessária) ou Verde (Cura Adequada).
-* **Gestão de Alarme (Mute):** O botão silencia o buzzer para reduzir a poluição sonora, mas o LED vermelho permanece aceso até que as condições de umidade/temperatura voltem aos níveis seguros, garantindo que o alerta visual nunca seja ignorado.
-* **Driver de Display Otimizado:** Criado para enviar comandos em *nibbles* de 4 bits, o que reduz erros de comunicação e caracteres fantasmas no LCD.
+* **Sinalização Preventiva (LED Amarelo):** Diferente de sistemas binários, o SmartCure introduz a "Zona de Atenção". Isso permite uma gestão proativa na obra, avisando que os limites de segurança estão próximos antes que o dano ocorra, prevenindo danos irreversíveis a estrutura do concreto.
+* **Instruções Técnicas de Campo:** O LCD não exibe apenas números, ele fornece instruções de engenharia como **"MOLHAR CONCRETO"** ou **"COBRIR DO SOL"**, traduzindo dados brutos em ações práticas de canteiro, minimizando o tempo de pensamento do responsável e agilizando a tomada de descisão.
+* **Gestão de Alarme (Anti-Fadiga):** O buzzer é acionado apenas no estado **Vermelho (Crítico)**. No estado amarelo, a sinalização é apenas visual, evitando a poluição sonora desnecessária que leva os operadores a ignorarem alarmes em ambiente real.
+* **Compatibilidade CI/CD:** O firmware foi adaptado para execução automatizada via **GitHub Actions** e **Wokwi CLI**, garantindo que cada commit seja validado tecnicamente na nuvem.
 
 ---
 
-### 5️⃣ Resultados Obtidos e Limitações
+### 5️⃣ Demonstração da Simulação
+
+#### 🟢 Estado Ideal
+<img width="764" height="476" alt="image" src="https://github.com/user-attachments/assets/8ecd1d94-2ecc-4651-88fd-e100c0a8e375" />
+
+*Estado de Conformidade: Parâmetros dentro da normalidade, garantindo uma cura lenta e eficaz sem riscos imediatos.*
+
+#### 🟡 Estado de Atenção
+<img width="765" height="478" alt="image" src="https://github.com/user-attachments/assets/53a83670-eea4-477e-982a-49670b874f21" />
+
+*Monitoramento Preventivo: O sistema identifica que os níveis de umidade ou temperatura estão se aproximando dos limites críticos de projeto.*
+
+#### 🔴 Estado Crítico
+<img width="750" height="489" alt="image" src="https://github.com/user-attachments/assets/49f7b2ae-c20c-43a4-87bd-2d7ffdea344c" />
+
+*Intervenção Urgente: Alerta visual e sonoro acionados. O LCD instrui a ação corretiva imediata para evitar fissuras e perda de resistência.*
+
+---
+
+### 6️⃣ Resultados Obtidos e Limitações
 **Resultados:**
 * **Automação de CI/CD:** Pipeline validada com sucesso. O uso do binário LittleFS garantiu a estabilidade dos testes automatizados no Wokwi sempre que um novo commit é enviado.
 * **Monitoramento Constante:** O sistema mantém um log de leitura estável, identificando riscos de dessecação (Umidade < 60%) e calor excessivo (Temp > 45°C).
+* **Interface de usuário (UI):** Implementação de uma interface simples focada na tomada de decisão rápida no canteiro de obras.
+* **Lógica Robusta:** Lógica de firmware robusta e resiliente a erros de leitura de sensores.
 
 **Limitações Atuais:**
 * **Ponto Único de Leitura:** O protótipo utiliza apenas um sensor de face, não capturando variações em grandes áreas de concretagem.
@@ -63,12 +81,13 @@ Imagem do projeto SmartCure IoT
 
 ---
 
-### 6️⃣ Dificuldades e Melhorias Futuras
+### 7️⃣ Dificuldades e Melhorias Futuras
 **Dificuldades Encontradas:**
 O maior desafio técnico foi adequar o ambiente de simulação local para a esteira de integração contínua (CI). O Wokwi CLI exigia a pré-montagem do sistema de arquivos do ESP32 para executar o MicroPython no GitHub Actions, o que me obrigou a estudar e implementar o empacotamento do firmware via `littlefs`. Além disso, a calibração do barramento I2C no simulador exigiu o desenvolvimento de uma classe personalizada (`MiniLCD`) para controlar manualmente o tempo de pulso do sinal de *Enable*.
 
 **Melhorias Planejadas (V2):**
-* **Gradiente Térmico:** Reintegração do potenciômetro para simular sensores de núcleo, permitindo comparar a temperatura interna vs. externa (essencial para concreto de massa).
+* **Deep Sleep:** Implementação de modos de economia de energia para operação via bateria em obras remotas.
+* **Gradiente Térmico:** Integração de um potenciômetro para simular um sensor de temperatura no núcleo do concreto, permitindo comparar a temperatura interna vs. externa (essencial para concreto de massa).
 * **Expansão de Interface:** Upgrade para LCD 20x4 para exibição simultânea de mais métricas de engenharia.
 * **Integração Mobile:** Envio de alertas via MQTT/Telegram para dispositivos móveis, permitindo que o engenheiro responsável monitore a cura à distância.
 * **Análise de Maturação:** Implementação de algoritmos para cálculo da curva de maturidade do concreto diretamente no ESP32.
