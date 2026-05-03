@@ -2,6 +2,8 @@ import machine
 import dht
 import time
 
+print("Teste")
+
 ## Configuração das Portas
 PIN_DHT      = 15
 PIN_BUZZER   = 13
