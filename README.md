@@ -41,11 +41,14 @@ A arquitetura prioriza a **confiabilidade industrial**:
 ---
 
 ### 4️⃣ Decisões Técnicas Relevantes
-* **Geração de Imagem Binária (LittleFS):** Para viabilizar a execução automatizada na esteira de CI/CD (GitHub Actions), foi necessário adicionar um processo de *build* que gera um sistema de arquivos binário utilizando a biblioteca `littlefs`. Isso permitiu empacotar o `main.py` e montá-lo diretamente na memória flash do ESP32 virtual, garantindo que o Wokwi CLI iniciasse o firmware corretamente durante os testes.
+
 * **Sinalização Preventiva (LED Amarelo):** Diferente de sistemas binários, o SmartCure introduz a "Zona de Atenção". Isso permite uma gestão proativa na obra, avisando que os limites de segurança estão próximos antes que o dano ocorra, prevenindo danos irreversíveis a estrutura do concreto.
-* **Instruções Técnicas de Campo:** O LCD não exibe apenas números, ele fornece instruções de engenharia como **"MOLHAR CONCRETO"** ou **"COBRIR DO SOL"**, traduzindo dados brutos em ações práticas de canteiro, minimizando o tempo de pensamento do responsável e agilizando a tomada de descisão.
+* **Instruções Técnicas de Campo:** O LCD não exibe apenas números, ele fornece instruções de engenharia como **"MOLHAR CONCRETO"** ou **"COBRIR DO SOL"**, traduzindo dados brutos em ações práticas de canteiro, minimizando o tempo de pensamento do responsável e agilizando a tomada de decisão.
 * **Gestão de Alarme (Anti-Fadiga):** O buzzer é acionado apenas no estado **Vermelho (Crítico)**. No estado amarelo, a sinalização é apenas visual, evitando a poluição sonora desnecessária que leva os operadores a ignorarem alarmes em ambiente real.
 * **Compatibilidade CI/CD:** O firmware foi adaptado para execução automatizada via **GitHub Actions** e **Wokwi CLI**, garantindo que cada commit seja validado tecnicamente na nuvem.
+* **Geração de Imagem Binária (LittleFS):** Para viabilizar a execução automatizada na esteira de CI/CD (GitHub Actions), foi necessário adicionar um processo de *build* que gera um sistema de arquivos binário utilizando a biblioteca `littlefs`. Isso permitiu empacotar o `main.py` e montá-lo diretamente na memória flash do ESP32 virtual, garantindo que o Wokwi CLI iniciasse o firmware corretamente durante os testes.
+>[!IMPORTANT]
+Nota de Desenvolvimento: Toda vez que o arquivo main.py for modificado, o script build.py deve ser executado para atualizar o binário. Caso contrário, as alterações não serão refletidas nas GitHub Actions.
 
 ---
 
